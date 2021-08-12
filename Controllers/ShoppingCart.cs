@@ -11,26 +11,37 @@ namespace MilkAndCookies.Controllers
     [Route("[controller]")]
     public class ShoppingCart : Controller
     {
-        private IList<Product> shoppingCart = new List<Product>();
-        
-        
         [HttpGet]
         public IEnumerable Get(string name, double price)
         {
-            // testing purposes of 2E as i don't know how i can add more than 1 product to the list
-            var testOpgave2E = new Product("test",1000);
+            // fetch shoppingCart from session 
+            List<Product> shoppingCart = HttpContext.Session.GetObjectFromJson<List<Product>>("shoppingCart");
             // create temp product to be added to the list later
             var tmpProduct = new Product(name, price);
-            
-            // add the product to the list
-            shoppingCart.Add(tmpProduct);
-            shoppingCart.Add(testOpgave2E);
-            // puts the shoppingCart into the session as a json string
-            HttpContext.Session.SetObjectAsJson("shoppingCart", shoppingCart);
+
+            // check if the shoppingCart not empty
+            if (shoppingCart != null)
+            {
+                // add the new product to the shoppingCart
+                shoppingCart.Add(tmpProduct);
+                // add the shoppingCart to the session
+                HttpContext.Session.SetObjectAsJson("shoppingCart", shoppingCart);
+            }
+
+            else
+            {
+                // create new shoppingCart
+                shoppingCart = new List<Product>();
+                // add the product to the list
+                shoppingCart.Add(tmpProduct);
+                // add the shoppingCart to session
+                HttpContext.Session.SetObjectAsJson("shoppingCart", shoppingCart);
+            }
+
             // return the shoppingCart to the client
             return shoppingCart;
-
         }
+
         // this method returns the shoppingCart from the session
         [HttpGet]
         [Route("fetch-shoppingCart-from-session")]
